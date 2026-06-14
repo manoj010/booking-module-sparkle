@@ -23,11 +23,11 @@ services:
       HOST: db
       USER: odoo
       PASSWORD: odoo
+      PYTHONDONTWRITEBYTECODE: "1"
     volumes:
       - odoo-sparkle-cleaning-web-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
-      - ../odoo-18/custom_addons/enterprise/appointment:/mnt/sparkle-appointment-addons/appointment:ro
-      - ../odoo-18/custom_addons/custom/gantt_view:/mnt/sparkle-appointment-addons/gantt_view:ro
+      - ./external_addons:/mnt/external-addons:ro
       - ./config:/etc/odoo
     restart: unless-stopped
 

@@ -70,6 +70,7 @@
                 <field name="customer_name"/>
                 <field name="product_id"/>
                 <field name="appointment_type_id"/>
+                <field name="crm_lead_id"/>
                 <field name="booking_start"/>
                 <field name="booking_stop"/>
                 <field name="price"/>
@@ -99,6 +100,7 @@
                             <field name="booking_stop"/>
                             <field name="appointment_type_id"/>
                             <field name="calendar_event_id"/>
+                            <field name="crm_lead_id"/>
                             <field name="price"/>
                             <field name="payment_status"/>
                             <field name="state"/>
@@ -123,7 +125,17 @@
         <field name="view_mode">list,form</field>
     </record>
 
+    <record id="sparkle_booking_crm_lead_action" model="ir.actions.act_window">
+        <field name="name">CRM Leads</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">kanban,list,form,calendar,pivot,graph,activity</field>
+        <field name="domain">[('source_id.name', '=', 'Website Booking')]</field>
+        <field name="context" eval="{'default_source_id': ref('sparkle_booking_flow.sparkle_booking_source_website')}"/>
+    </record>
+
     <menuitem id="sparkle_booking_menu_root" name="Sparkle Booking" sequence="30"/>
     <menuitem id="sparkle_booking_menu_bookings" name="Bookings" parent="sparkle_booking_menu_root" action="sparkle_booking_action" sequence="10"/>
     <menuitem id="sparkle_booking_menu_services" name="Service Products" parent="sparkle_booking_menu_root" action="sparkle_booking_service_action" sequence="20"/>
+    <menuitem id="sparkle_booking_menu_appointments" name="Appointments" parent="sparkle_booking_menu_root" action="appointment.appointment_type_action" sequence="30"/>
+    <menuitem id="sparkle_booking_menu_crm_leads" name="CRM Leads" parent="sparkle_booking_menu_root" action="sparkle_booking_crm_lead_action" sequence="40"/>
 </odoo>

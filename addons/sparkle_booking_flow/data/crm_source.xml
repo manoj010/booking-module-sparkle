@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="sparkle_booking_source_website" model="utm.source">
+        <field name="name">Website Booking</field>
+    </record>
+</odoo>

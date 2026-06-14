@@ -83,6 +83,7 @@ class ProductTemplate(models.Model):
 class SparkleBooking(models.Model):
     _name = "sparkle.booking"
     _description = "Sparkle Booking"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "create_date desc"
 
     product_id = fields.Many2one(
@@ -94,6 +95,7 @@ class SparkleBooking(models.Model):
     partner_id = fields.Many2one("res.partner", string="Customer")
     calendar_event_id = fields.Many2one("calendar.event", string="Calendar Event", readonly=True)
     appointment_type_id = fields.Many2one("appointment.type", string="Appointment Type", readonly=True)
+    crm_lead_id = fields.Many2one("crm.lead", string="CRM Lead", readonly=True)
     customer_name = fields.Char(required=True)
     email = fields.Char(required=True)
     phone = fields.Char()

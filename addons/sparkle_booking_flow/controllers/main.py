@@ -114,10 +114,13 @@ class SparkleBookingController(http.Controller):
         )
         event = self._create_appointment_event(booking, product, partner, selected_slot)
         booking.calendar_event_id = event.id
+        lead = self._create_crm_lead(booking, product, partner)
+        booking.crm_lead_id = lead.id
         return {
             "success": True,
             "booking_id": booking.id,
             "calendar_event_id": event.id,
+            "crm_lead_id": lead.id,
             "message": "Your cleaning service has been successfully booked.",
         }
 
@@ -239,3 +242,44 @@ class SparkleBookingController(http.Controller):
             }
         )
         return request.env["calendar.event"].sudo().create(event_values)
+
+    def _create_crm_lead(self, booking, product, partner):
+        source = self._get_website_booking_source()
+        description_parts = [
+            "<p><strong>Service:</strong> %s</p>" % html_escape(product.display_name),
+            "<p><strong>Appointment:</strong> %s</p>" % html_escape(fields.Datetime.to_string(booking.booking_start)),
+            "<p><strong>Customer:</strong> %s</p>" % html_escape(booking.customer_name),
+            "<p><strong>Email:</strong> %s</p>" % html_escape(booking.email),
+            "<p><strong>Phone:</strong> %s</p>" % html_escape(booking.phone or ""),
+        ]
+        if booking.location:
+            description_parts.append("<p><strong>Location:</strong> %s</p>" % html_escape(booking.location))
+        if booking.message:
+            description_parts.append("<p><strong>Message:</strong><br/>%s</p>" % html_escape(booking.message))
+
+        lead = request.env["crm.lead"].sudo().create(
+            {
+                "name": "Website Booking: %s" % product.display_name,
+                "type": "opportunity",
+                "partner_id": partner.id,
+                "contact_name": booking.customer_name,
+                "email_from": booking.email,
+                "phone": booking.phone,
+                "expected_revenue": booking.price,
+                "source_id": source.id,
+                "description": "".join(description_parts),
+            }
+        )
+        booking.message_post(body="CRM opportunity created: %s" % html_escape(lead.display_name))
+        return lead
+
+    def _get_website_booking_source(self):
+        source = request.env.ref(
+            "sparkle_booking_flow.sparkle_booking_source_website",
+            raise_if_not_found=False,
+        )
+        if source:
+            return source.sudo()
+        return request.env["utm.source"].sudo().search([("name", "=", "Website Booking")], limit=1) or request.env[
+            "utm.source"
+        ].sudo().create({"name": "Website Booking"})

@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.pytest_cache/
+.ruff_cache/
+
+# Local Odoo runtime data and mounted third-party addons.
+external_addons/*
+!external_addons/README.md
+
