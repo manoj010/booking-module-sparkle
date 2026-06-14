@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="product_carpet_upholstery_cleaning" model="product.template">
+        <field name="name">Carpet &amp; Upholstery Cleaning</field>
+        <field name="description_sale">Professional steam and dry cleaning.</field>
+        <field name="type">service</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">False</field>
+        <field name="list_price">45.0</field>
+        <field name="sequence">10</field>
+        <field name="sparkle_bookable_service">True</field>
+        <field name="sparkle_icon_class">fa fa-object-group</field>
+        <field name="sparkle_duration_minutes">90</field>
+    </record>
+
+    <record id="product_water_damage_restoration" model="product.template">
+        <field name="name">Water Damage Restoration</field>
+        <field name="description_sale">Professional steam and dry cleaning.</field>
+        <field name="type">service</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">False</field>
+        <field name="list_price">85.0</field>
+        <field name="sequence">20</field>
+        <field name="sparkle_bookable_service">True</field>
+        <field name="sparkle_icon_class">fa fa-tint</field>
+        <field name="sparkle_duration_minutes">120</field>
+    </record>
+
+    <record id="product_end_of_lease_cleaning" model="product.template">
+        <field name="name">End Of Lease Cleaning</field>
+        <field name="description_sale">Professional steam and dry cleaning.</field>
+        <field name="type">service</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">False</field>
+        <field name="list_price">120.0</field>
+        <field name="sequence">30</field>
+        <field name="sparkle_bookable_service">True</field>
+        <field name="sparkle_icon_class">fa fa-paint-brush</field>
+        <field name="sparkle_duration_minutes">180</field>
+    </record>
+
+    <record id="product_commercial_premises_cleaning" model="product.template">
+        <field name="name">Commercial Premises Cleaning</field>
+        <field name="description_sale">Professional steam and dry cleaning.</field>
+        <field name="type">service</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">False</field>
+        <field name="list_price">95.0</field>
+        <field name="sequence">40</field>
+        <field name="sparkle_bookable_service">True</field>
+        <field name="sparkle_icon_class">fa fa-building-o</field>
+        <field name="sparkle_duration_minutes">150</field>
+    </record>
+
+    <record id="product_mould_removal_remediation" model="product.template">
+        <field name="name">Mould Removal &amp; Remediation</field>
+        <field name="description_sale">Professional steam and dry cleaning.</field>
+        <field name="type">service</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">False</field>
+        <field name="list_price">75.0</field>
+        <field name="sequence">50</field>
+        <field name="sparkle_bookable_service">True</field>
+        <field name="sparkle_icon_class">fa fa-fire-extinguisher</field>
+        <field name="sparkle_duration_minutes">120</field>
+    </record>
+
+    <record id="product_builders_post_reno_cleaning" model="product.template">
+        <field name="name">Builders &amp; Post-Reno Cleaning</field>
+        <field name="description_sale">Professional steam and dry cleaning.</field>
+        <field name="type">service</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">False</field>
+        <field name="list_price">110.0</field>
+        <field name="sequence">60</field>
+        <field name="sparkle_bookable_service">True</field>
+        <field name="sparkle_icon_class">fa fa-truck</field>
+        <field name="sparkle_duration_minutes">180</field>
+    </record>
+</odoo>

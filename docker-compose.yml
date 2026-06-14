@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16
+    container_name: odoo-sparkle-cleaning
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+    ports:
+      - "5439:5432"
+    volumes:
+      - odoo-sparkle-cleaning-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  odoo:
+    image: odoo:18.0
+    container_name: odoo-sparkle-cleaning-web
+    depends_on:
+      - db
+    ports:
+      - "8075:8069"
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: odoo
+    volumes:
+      - odoo-sparkle-cleaning-web-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ../odoo-18/custom_addons/enterprise/appointment:/mnt/sparkle-appointment-addons/appointment:ro
+      - ../odoo-18/custom_addons/custom/gantt_view:/mnt/sparkle-appointment-addons/gantt_view:ro
+      - ./config:/etc/odoo
+    restart: unless-stopped
+
+volumes:
+  odoo-sparkle-cleaning-db-data:
+  odoo-sparkle-cleaning-web-data:

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sparkle_booking_service_view_tree" model="ir.ui.view">
+        <field name="name">sparkle.booking.service.product.list</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="list_price"/>
+                <field name="sparkle_duration_minutes"/>
+                <field name="sparkle_appointment_type_id"/>
+                <field name="sparkle_bookable_service"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="sparkle_booking_service_view_form" model="ir.ui.view">
+        <field name="name">sparkle.booking.service.product.form</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="description_sale"/>
+                            <field name="sparkle_icon_class"/>
+                        </group>
+                        <group>
+                            <field name="type"/>
+                            <field name="sale_ok"/>
+                            <field name="purchase_ok"/>
+                            <field name="list_price"/>
+                            <field name="sparkle_duration_minutes"/>
+                            <field name="sparkle_appointment_type_id"/>
+                            <field name="sparkle_bookable_service"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sparkle_booking_service_action" model="ir.actions.act_window">
+        <field name="name">Service Products</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('type', '=', 'service'), ('sale_ok', '=', True)]</field>
+        <field name="context">{'active_test': False, 'default_type': 'service', 'default_sale_ok': True, 'default_purchase_ok': False, 'default_sparkle_bookable_service': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create the Odoo service products customers can book.
+            </p>
+            <p>
+                Products marked as bookable appear dynamically in the website booking flow and drive calendar duration/pricing.
+            </p>
+        </field>
+    </record>
+
+    <record id="sparkle_booking_view_tree" model="ir.ui.view">
+        <field name="name">sparkle.booking.list</field>
+        <field name="model">sparkle.booking</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="create_date"/>
+                <field name="customer_name"/>
+                <field name="product_id"/>
+                <field name="appointment_type_id"/>
+                <field name="booking_start"/>
+                <field name="booking_stop"/>
+                <field name="price"/>
+                <field name="payment_status"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="sparkle_booking_view_form" model="ir.ui.view">
+        <field name="name">sparkle.booking.form</field>
+        <field name="model">sparkle.booking</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="partner_id"/>
+                            <field name="customer_name"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="location"/>
+                        </group>
+                        <group>
+                            <field name="booking_start"/>
+                            <field name="booking_stop"/>
+                            <field name="appointment_type_id"/>
+                            <field name="calendar_event_id"/>
+                            <field name="price"/>
+                            <field name="payment_status"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Message">
+                            <field name="message"/>
+                        </page>
+                        <page string="Internal Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sparkle_booking_action" model="ir.actions.act_window">
+        <field name="name">Bookings</field>
+        <field name="res_model">sparkle.booking</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="sparkle_booking_menu_root" name="Sparkle Booking" sequence="30"/>
+    <menuitem id="sparkle_booking_menu_bookings" name="Bookings" parent="sparkle_booking_menu_root" action="sparkle_booking_action" sequence="10"/>
+    <menuitem id="sparkle_booking_menu_services" name="Service Products" parent="sparkle_booking_menu_root" action="sparkle_booking_service_action" sequence="20"/>
+</odoo>

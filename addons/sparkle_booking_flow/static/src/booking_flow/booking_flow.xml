@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sparkle_booking_flow.SparkleBookingFlow">
+        <div t-att-class="state.isOpen ? 'o_sparkle_booking_overlay is-open' : 'o_sparkle_booking_overlay'" aria-modal="true" role="dialog">
+            <div class="o_sparkle_booking_shell">
+                <header class="o_sparkle_booking_header">
+                    <button type="button" class="o_sparkle_booking_close" t-on-click="close" aria-label="Close">x</button>
+                    <div class="o_sparkle_booking_logo">
+                        <img src="/sparkle_booking_flow/static/src/img/sparkle_cleaning_team_logo.png" alt="Sparkle Cleaning Team"/>
+                    </div>
+                    <div class="o_sparkle_booking_progress">
+                        <span t-att-style="'width: ' + progressWidth"/>
+                    </div>
+                </header>
+
+                <main class="o_sparkle_booking_body">
+                    <div class="o_sparkle_booking_title">
+                        <h2 t-esc="title"/>
+                        <p t-esc="subtitle"/>
+                    </div>
+
+                    <div t-if="state.error" class="o_sparkle_booking_error" t-esc="state.error"/>
+
+                    <section t-if="state.step === 1" class="o_sparkle_booking_card o_sparkle_services">
+                        <button t-foreach="state.services" t-as="service" t-key="service.id"
+                                type="button"
+                                t-att-class="state.selectedService &amp;&amp; state.selectedService.id === service.id ? 'o_sparkle_service_tile is-selected' : 'o_sparkle_service_tile'"
+                                t-on-click="() => this.selectService(service)">
+                            <i t-att-class="service.icon_class"/>
+                            <strong t-esc="service.name"/>
+                            <span t-esc="service.description"/>
+                            <em/>
+                        </button>
+                    </section>
+
+                    <section t-if="state.step === 2" class="o_sparkle_booking_card o_sparkle_schedule">
+                        <Summary selectedService="state.selectedService" selectedDateLabel="state.selectedDateLabel" selectedTime="state.selectedTime"/>
+                        <div class="o_sparkle_calendar">
+                            <div class="o_sparkle_calendar_head">
+                                <strong>CALENDAR</strong>
+                                <div>
+                                    <button type="button" t-on-click="goToPreviousMonth" t-att-disabled="!canGoToPreviousMonth"><i class="fa fa-chevron-left"/></button>
+                                    <button type="button" t-esc="state.currentYear"/>
+                                    <button type="button" t-esc="currentMonthName"/>
+                                    <button type="button" t-on-click="goToNextMonth"><i class="fa fa-chevron-right"/></button>
+                                </div>
+                            </div>
+                            <div class="o_sparkle_weekdays">
+                                <span t-foreach="weekdays" t-as="weekday" t-key="weekday" t-esc="weekday"/>
+                            </div>
+                            <div class="o_sparkle_days">
+                                <button t-foreach="days" t-as="day" t-key="day.key"
+                                        type="button"
+                                        t-att-disabled="day.isPast"
+                                        t-att-class="(state.selectedDate === day.value ? 'is-selected ' : '') + (day.isMuted ? 'is-muted ' : '') + (day.isWeekend ? 'is-weekend ' : '') + (day.isPast ? 'is-past' : '')"
+                                        t-on-click="() => this.selectDate(day)"
+                                        t-esc="day.label"/>
+                            </div>
+                        </div>
+                        <div class="o_sparkle_times">
+                            <strong>AVAILABLE TIME</strong>
+                            <p t-if="state.loadingSlots" class="o_sparkle_slot_note">Loading times...</p>
+                            <p t-elif="!state.selectedDate" class="o_sparkle_slot_note">Select a date first.</p>
+                            <p t-elif="!state.times.length" class="o_sparkle_slot_note">No times available.</p>
+                            <button t-foreach="state.times" t-as="time" t-key="time"
+                                    type="button"
+                                    t-att-class="state.selectedTime === time ? 'is-selected' : ''"
+                                    t-on-click="() => this.selectTime(time)"
+                                    t-esc="time"/>
+                        </div>
+                    </section>
+
+                    <section t-if="state.step === 3" class="o_sparkle_booking_card o_sparkle_details">
+                        <Summary selectedService="state.selectedService" selectedDateLabel="state.selectedDateLabel" selectedTime="state.selectedTime"/>
+                        <div class="o_sparkle_form">
+                            <label><i class="fa fa-user-o"/> <input placeholder="Your Full Name" t-att-value="state.customer.name" t-on-input="(ev) => this.updateCustomer('name', ev)"/></label>
+                            <label><i class="fa fa-envelope-o"/> <input placeholder="Your Email Address" t-att-value="state.customer.email" t-on-input="(ev) => this.updateCustomer('email', ev)"/></label>
+                            <label><span>+977</span> <input placeholder="Enter Phone Number" t-att-value="state.customer.phone" t-on-input="(ev) => this.updateCustomer('phone', ev)"/></label>
+                            <label><i class="fa fa-map-marker"/> <input placeholder="Your Location" t-att-value="state.customer.location" t-on-input="(ev) => this.updateCustomer('location', ev)"/></label>
+                            <textarea placeholder="Leave a message (optional)" t-att-value="state.customer.message" t-on-input="(ev) => this.updateCustomer('message', ev)"/>
+                        </div>
+                    </section>
+
+                    <section t-if="state.step === 4" class="o_sparkle_booking_card o_sparkle_payment">
+                        <Summary selectedService="state.selectedService" selectedDateLabel="state.selectedDateLabel" selectedTime="state.selectedTime"/>
+                        <div class="o_sparkle_price">
+                            <div>A$ <strong t-esc="(state.selectedService &amp;&amp; state.selectedService.price || 0).toFixed(2)"/></div>
+                            <p>This is the charge for this service.</p>
+                        </div>
+                        <div class="o_sparkle_payment_form">
+                            <strong>Choose Payment Method</strong>
+                            <div class="o_sparkle_payment_tabs">
+                                <button type="button" class="is-active"><i class="fa fa-credit-card"/> Pay Later</button>
+                                <button type="button"><i class="fa fa-cc-mastercard"/> Mastercard</button>
+                                <button type="button"><i class="fa fa-apple"/> Apple Pay</button>
+                            </div>
+                            <input placeholder="Credit Card Number" disabled="disabled"/>
+                            <input placeholder="Expiry Date                                      YYYY  -  MM" disabled="disabled"/>
+                            <input placeholder="CVV" disabled="disabled"/>
+                            <small>Mock payment only. The booking will be saved as pending.</small>
+                        </div>
+                    </section>
+
+                    <section t-if="state.step === 5" class="o_sparkle_success">
+                        <div class="o_sparkle_success_art">
+                            <span class="o_sparkle_confetti c1"/>
+                            <span class="o_sparkle_confetti c2"/>
+                            <span class="o_sparkle_confetti c3"/>
+                            <span class="o_sparkle_success_icon"><i class="fa fa-check"/></span>
+                        </div>
+                        <h2>Booking Confirmed</h2>
+                        <p>Your cleaning service has been successfully booked.<br/>We look forward to serving you at your scheduled appointment.</p>
+                        <button type="button" class="o_sparkle_download"><i class="fa fa-download"/> Download Booking Details</button>
+                    </section>
+                </main>
+
+                <footer class="o_sparkle_booking_footer">
+                    <button type="button" class="o_sparkle_back" t-on-click="back"><i class="fa fa-arrow-left"/> Go Back</button>
+                    <div>
+                        <button type="button" class="o_sparkle_reset" t-on-click="reset"><i class="fa fa-refresh"/> Reset</button>
+                        <button type="button" class="o_sparkle_continue" t-on-click="next" t-att-disabled="state.loading">
+                            <t t-if="state.loading">Saving...</t>
+                            <t t-elif="state.step === 5">Finish <i class="fa fa-arrow-right"/></t>
+                            <t t-else="">Continue <i class="fa fa-arrow-right"/></t>
+                        </button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="sparkle_booking_flow.Summary">
+        <aside class="o_sparkle_summary">
+            <i t-att-class="props.selectedService &amp;&amp; props.selectedService.icon_class || 'fa fa-object-group'"/>
+            <h3 t-esc="props.selectedService &amp;&amp; props.selectedService.name || 'Carpet &amp; Upholstery Cleaning'"/>
+            <p t-esc="props.selectedService &amp;&amp; props.selectedService.description || 'Professional steam and dry cleaning.'"/>
+            <h4>Booking Details</h4>
+            <p>Date : <strong t-esc="props.selectedDateLabel || ''"/></p>
+            <p>Time : <strong t-esc="props.selectedTime || ''"/></p>
+        </aside>
+    </t>
+</templates>

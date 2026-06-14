@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="sparkle_booking_flow_mount" inherit_id="website.layout" name="Sparkle Booking Flow Mount">
+        <xpath expr="//div[@id='wrapwrap']" position="inside">
+            <div id="sparkle_booking_flow_mount"/>
+        </xpath>
+    </template>
+</odoo>
