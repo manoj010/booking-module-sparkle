@@ -5,4 +5,95 @@
             <div id="sparkle_booking_flow_mount"/>
         </xpath>
     </template>
+
+    <template id="portal_my_home_sparkle_bookings" inherit_id="portal.portal_my_home" name="Sparkle Bookings Portal Home">
+        <xpath expr="//div[@id='portal_service_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Sparkle Bookings</t>
+                <t t-set="text">Review your cleaning appointments</t>
+                <t t-set="url" t-value="'/my/sparkle-bookings'"/>
+                <t t-set="placeholder_count" t-value="'sparkle_booking_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_sparkle_bookings" name="My Sparkle Bookings">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Sparkle Bookings</t>
+            </t>
+            <t t-if="not bookings">
+                <p class="alert alert-info">You do not have any Sparkle bookings yet.</p>
+            </t>
+            <t t-if="bookings">
+                <t t-call="portal.portal_table">
+                    <thead>
+                        <tr>
+                            <th>Booking</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="bookings" t-as="booking">
+                            <td>
+                                <a t-att-href="'/my/sparkle-bookings/%s' % booking.id">
+                                    <span t-out="'#%s' % booking.id"/>
+                                </a>
+                            </td>
+                            <td><span t-field="booking.product_id"/></td>
+                            <td><span t-field="booking.booking_start"/></td>
+                            <td><span t-field="booking.state"/></td>
+                        </tr>
+                    </tbody>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_sparkle_booking" name="My Sparkle Booking">
+        <t t-call="portal.portal_layout">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                <div>
+                    <h3>Booking #<span t-out="booking.id"/></h3>
+                    <p class="text-muted mb-0"><span t-field="booking.product_id"/></p>
+                </div>
+                <a class="btn btn-primary" t-att-href="booking.get_download_url()">Download Calendar Invite</a>
+            </div>
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Appointment</h5>
+                            <p><strong>Start:</strong> <span t-field="booking.booking_start"/></p>
+                            <p><strong>End:</strong> <span t-field="booking.booking_stop"/></p>
+                            <p><strong>Status:</strong> <span t-field="booking.state"/></p>
+                            <p><strong>Payment:</strong> <span t-field="booking.payment_status"/></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Contact</h5>
+                            <p><strong>Name:</strong> <span t-field="booking.customer_name"/></p>
+                            <p><strong>Email:</strong> <span t-field="booking.email"/></p>
+                            <p><strong>Phone:</strong> <span t-field="booking.phone"/></p>
+                            <p><strong>Location:</strong> <span t-field="booking.location"/></p>
+                        </div>
+                    </div>
+                </div>
+                <div t-if="booking.message" class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Message</h5>
+                            <p class="mb-0" t-out="booking.message"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
 </odoo>

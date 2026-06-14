@@ -1,32 +1,38 @@
 # Sparkle Booking Flow
 
-This Odoo 18 addon adds a full-screen website booking flow for cleaning services. Service choices are Odoo service products, and available times are computed by Odoo Appointment.
+This Odoo 18 addon provides a custom full-screen Sparkle website booking flow while using Odoo standard apps for the business objects behind it.
+
+The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointment, Calendar, CRM, Portal, and Mail.
 
 ## What It Adds
 
-- A website overlay booking flow opened by any button or link with the class `js_open_sparkle_booking`.
-- Website service choices powered by Odoo `product.template` / `product.product`.
-- Odoo Appointment Types linked to each bookable service product.
-- A backend app menu named `Sparkle Booking`.
-- A backend booking model named `sparkle.booking`.
-- Sparkle-specific product fields for website visibility, icon class, duration, and Appointment Type.
-- Public JSON routes for loading bookable services, loading Appointment-backed slots, and creating bookings.
-- Appointment calendar events created from confirmed bookings.
-- A mock payment step that saves bookings with `payment_status = pending`.
+- A website overlay opened by any button or link with the class `js_open_sparkle_booking`.
+- Website service choices powered by Odoo service products.
+- Optional service images and product category filtering in the Sparkle UI.
+- Odoo Appointment Types linked to bookable service products.
+- Stable Appointment slot payloads so the frontend submits an exact slot key, not only a time label.
+- Confirmed `sparkle.booking` records for website submissions.
+- Linked Odoo Appointment `calendar.event` records.
+- Linked Odoo CRM opportunities with source `Website Booking`.
+- Confirmation emails using an Odoo mail template.
+- Customer portal pages under `/my/sparkle-bookings`.
+- Calendar invite download as an `.ics` file.
+- Backend workflow buttons for confirming, cancelling, completing, and opening linked records.
 
 ## User Flow
 
 1. A visitor clicks a website button with `.js_open_sparkle_booking`.
-2. The overlay slides up over the current page.
-3. The visitor selects a bookable Odoo service product.
-4. The visitor selects an available Odoo Appointment slot using the custom Sparkle calendar UI.
+2. The Sparkle overlay opens over the current website page.
+3. The visitor filters/selects an Odoo service product.
+4. The visitor selects a date and a stable Odoo Appointment slot.
 5. The visitor enters contact details.
-6. The visitor confirms the mock payment step.
-7. Odoo creates or reuses a `res.partner`.
-8. Odoo creates a `sparkle.booking` record.
-9. Odoo creates a linked Appointment `calendar.event`.
-10. The success screen appears.
-11. The visitor clicks `Finish` and is redirected to `/`.
+6. The visitor confirms the current pay-later/mock payment step.
+7. `sparkle.booking.create_from_website()` creates or reuses the customer partner.
+8. Odoo creates the `sparkle.booking` record.
+9. Odoo creates the linked Appointment `calendar.event`.
+10. Odoo creates or updates the linked CRM opportunity.
+11. Odoo sends the confirmation email.
+12. The success screen exposes a calendar invite download.
 
 ## Service Products
 
@@ -47,11 +53,53 @@ Products appear in the booking flow when:
 Sparkle-specific product fields:
 
 - `Bookable in Sparkle Flow`: controls website visibility.
-- `Sparkle Icon Class`: Font Awesome class shown in the booking flow.
-- `Sparkle Duration`: default duration used when syncing Appointment Types.
+- `Sparkle Icon Class`: Font Awesome fallback shown when no product image is uploaded.
+- `Sparkle Duration`: duration used when syncing Appointment Types.
 - `Sparkle Appointment Type`: Odoo Appointment Type used for availability and booked events.
 
-The module syncs missing Appointment Types during module updates, so existing service products become Appointment-backed without reinstalling the module.
+The service product form also includes image upload, category, and buttons to generate/sync or open the linked Appointment Type.
+
+## Booking Creation
+
+The public controller is intentionally thin:
+
+- `/sparkle-booking/services` asks `sparkle.booking` for product payloads.
+- `/sparkle-booking/availability` asks `sparkle.booking` for Appointment-backed slot payloads.
+- `/sparkle-booking/create` calls `sparkle.booking.create_from_website()`.
+
+The model owns the reusable creation logic:
+
+- partner lookup/creation
+- slot re-validation
+- booking creation
+- appointment event creation
+- CRM lead creation/update
+- confirmation email sending
+
+This keeps the website route small and makes the booking behavior reusable from backend actions, tests, imports, or future APIs.
+
+## Appointment Slots
+
+The website calendar remains custom-styled, but available times come from Odoo Appointment.
+
+The availability route returns stable slot objects:
+
+```json
+{
+  "success": true,
+  "slots": [
+    {
+      "key": "2026-06-17 03:15:00|1.5|2",
+      "label": "09:00 AM",
+      "start": "2026-06-17 03:15:00",
+      "duration": 1.5,
+      "staff_user_id": 2
+    }
+  ]
+}
+```
+
+The Sparkle UI displays `label`, but submits `key`. The backend rechecks that exact slot before creating any booking.
 
 ## Booking Records
 
@@ -61,8 +109,6 @@ Submitted bookings are stored under:
 Sparkle Booking -> Bookings
 ```
 
-The booking stores the selected service product, customer contact, Appointment Type, linked calendar event, booking start/end, product price, payment status, state, and notes.
-
 New website bookings are created as:
 
 ```text
@@ -70,20 +116,13 @@ state = confirmed
 payment_status = pending
 ```
 
-## Appointment Slots
+Backend actions:
 
-The website calendar remains custom-styled, but its available time buttons come from Odoo Appointment.
-
-For each selected service/date, `/sparkle-booking/availability` calls the linked `appointment.type` slot engine and returns labels for the Sparkle UI:
-
-```json
-{
-  "success": true,
-  "slots": ["09:00 AM", "10:30 AM", "02:00 PM", "03:30 PM"]
-}
-```
-
-When the visitor submits, the selected time is validated again against the Appointment Type before any booking is created.
+- `Confirm`: marks the booking confirmed and the appointment booked.
+- `Cancel`: cancels the booking, archives the appointment event, and marks the CRM opportunity lost.
+- `Mark Done`: marks the booking done, sets the appointment status to checked-in/attended, and sets CRM probability to 100.
+- `Create/Update CRM Lead`: creates or refreshes the linked opportunity.
+- Smart buttons open the customer, appointment event, and CRM lead.
 
 ## Appointment Events
 
@@ -92,21 +131,56 @@ Every confirmed website booking creates a linked Appointment `calendar.event`.
 The event:
 
 - belongs to the service product's Appointment Type
-- has Odoo Appointment status
+- has Odoo Appointment status `booked`
 - uses Appointment attendees and reminders
 - includes the customer as the booker/attendee
 - links back to the `sparkle.booking` record
 
-## Docker Appointment Addons
+## CRM
 
-This setup mounts only the Appointment pieces needed by this repo:
+Every new website booking creates a CRM opportunity:
+
+- source: `Website Booking`
+- customer/contact fields from the booking
+- expected revenue from the product price
+- description with service, appointment, location, and message
+
+Bookings and CRM opportunities can be opened from each other through backend links/actions.
+
+## Portal And Downloads
+
+Customers can view their bookings under:
 
 ```text
-../odoo-18/custom_addons/enterprise/appointment -> /mnt/sparkle-appointment-addons/appointment
-../odoo-18/custom_addons/custom/gantt_view -> /mnt/sparkle-appointment-addons/gantt_view
+/my/sparkle-bookings
 ```
 
-The Odoo config includes `/mnt/sparkle-appointment-addons` in `addons_path`.
+Each booking detail page includes the booking status, appointment time, contact details, and a calendar invite download.
+
+The public `.ics` download route uses the booking access token:
+
+```text
+/sparkle-booking/<booking_id>/calendar.ics?access_token=<token>
+```
+
+The same download link is returned to the frontend success screen and included in the confirmation email.
+
+## Docker External Addons
+
+This project mounts required external addons from:
+
+```text
+./external_addons -> /mnt/external-addons
+```
+
+Required external addons:
+
+- `appointment`
+- `appointment_crm`
+- `website_appointment_crm`
+- `gantt_view`
+
+The Odoo config includes `/mnt/external-addons` in `addons_path`.
 
 ## Updating After Code Changes
 
@@ -116,4 +190,8 @@ For this Docker setup, update the module with:
 docker compose exec odoo odoo -c /etc/odoo/odoo.conf -d sparkle-cleaning-db -u sparkle_booking_flow --db_host=db --db_user=odoo --db_password=odoo --stop-after-init
 ```
 
-Then restart Odoo or refresh assets as needed.
+Then restart Odoo so Python controllers are refreshed:
+
+```powershell
+docker compose restart odoo
+```

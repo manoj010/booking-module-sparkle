@@ -62,22 +62,6 @@ function buildMonthDays(year, month) {
     return days;
 }
 
-function buildBookingStart(dateValue, timeValue) {
-    const match = timeValue.match(/^(\d{2}):(\d{2}) (AM|PM)$/);
-    if (!dateValue || !match) {
-        return "";
-    }
-    let hours = parseInt(match[1], 10);
-    const minutes = match[2];
-    if (match[3] === "PM" && hours !== 12) {
-        hours += 12;
-    }
-    if (match[3] === "AM" && hours === 12) {
-        hours = 0;
-    }
-    return `${dateValue}T${`${hours}`.padStart(2, "0")}:${minutes}:00`;
-}
-
 class Summary extends Component {
     static template = "sparkle_booking_flow.Summary";
     static props = {
@@ -96,6 +80,7 @@ export class SparkleBookingFlow extends Component {
             isOpen: false,
             step: 1,
             services: [],
+            selectedCategoryId: "all",
             selectedService: null,
             selectedDate: null,
             selectedDateLabel: "",
@@ -109,6 +94,7 @@ export class SparkleBookingFlow extends Component {
             },
             paymentMethod: "pay_later",
             bookingId: null,
+            downloadUrl: "",
             loading: false,
             loadingSlots: false,
             error: null,
@@ -166,6 +152,23 @@ export class SparkleBookingFlow extends Component {
         );
     }
 
+    get serviceCategories() {
+        const categories = new Map();
+        for (const service of this.state.services) {
+            if (service.category_id && service.category_name) {
+                categories.set(service.category_id, service.category_name);
+            }
+        }
+        return [...categories.entries()].map(([id, name]) => ({ id, name }));
+    }
+
+    get filteredServices() {
+        if (this.state.selectedCategoryId === "all") {
+            return this.state.services;
+        }
+        return this.state.services.filter((service) => service.category_id === this.state.selectedCategoryId);
+    }
+
     async fetchServices() {
         try {
             const services = await rpc("/sparkle-booking/services", {});
@@ -191,6 +194,7 @@ export class SparkleBookingFlow extends Component {
 
     reset() {
         this.state.step = 1;
+        this.state.selectedCategoryId = "all";
         this.state.selectedService = null;
         this.state.selectedDate = null;
         this.state.selectedDateLabel = "";
@@ -205,6 +209,7 @@ export class SparkleBookingFlow extends Component {
         this.state.customer.message = "";
         this.state.paymentMethod = "pay_later";
         this.state.bookingId = null;
+        this.state.downloadUrl = "";
         this.state.error = null;
     }
 
@@ -260,6 +265,18 @@ export class SparkleBookingFlow extends Component {
         this.state.selectedDateLabel = "";
         this.state.selectedTime = null;
         this.state.times = [];
+        this.state.error = null;
+    }
+
+    selectCategory(categoryId) {
+        this.state.selectedCategoryId = categoryId;
+        if (
+            this.state.selectedService &&
+            categoryId !== "all" &&
+            this.state.selectedService.category_id !== categoryId
+        ) {
+            this.selectService(null);
+        }
         this.state.error = null;
     }
 
@@ -340,18 +357,26 @@ export class SparkleBookingFlow extends Component {
                 phone: this.state.customer.phone,
                 location: this.state.customer.location,
                 message: this.state.customer.message,
-                booking_start: buildBookingStart(this.state.selectedDate, this.state.selectedTime),
+                date: this.state.selectedDate,
+                slot_key: this.state.selectedTime.key,
             });
             if (!result.success) {
                 this.state.error = result.message || "We could not create this booking.";
                 return;
             }
             this.state.bookingId = result.booking_id;
+            this.state.downloadUrl = result.download_url || "";
             this.state.step = 5;
         } catch {
             this.state.error = "We could not create this booking. Please try again.";
         } finally {
             this.state.loading = false;
+        }
+    }
+
+    downloadBookingDetails() {
+        if (this.state.downloadUrl) {
+            window.location.href = this.state.downloadUrl;
         }
     }
 }

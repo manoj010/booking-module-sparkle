@@ -22,15 +22,30 @@
                     <div t-if="state.error" class="o_sparkle_booking_error" t-esc="state.error"/>
 
                     <section t-if="state.step === 1" class="o_sparkle_booking_card o_sparkle_services">
-                        <button t-foreach="state.services" t-as="service" t-key="service.id"
-                                type="button"
-                                t-att-class="state.selectedService &amp;&amp; state.selectedService.id === service.id ? 'o_sparkle_service_tile is-selected' : 'o_sparkle_service_tile'"
-                                t-on-click="() => this.selectService(service)">
-                            <i t-att-class="service.icon_class"/>
-                            <strong t-esc="service.name"/>
-                            <span t-esc="service.description"/>
-                            <em/>
-                        </button>
+                        <div t-if="serviceCategories.length > 1" class="o_sparkle_service_filters">
+                            <button type="button"
+                                    t-att-class="state.selectedCategoryId === 'all' ? 'is-active' : ''"
+                                    t-on-click="() => this.selectCategory('all')">All</button>
+                            <button t-foreach="serviceCategories" t-as="category" t-key="category.id"
+                                    type="button"
+                                    t-att-class="state.selectedCategoryId === category.id ? 'is-active' : ''"
+                                    t-on-click="() => this.selectCategory(category.id)"
+                                    t-esc="category.name"/>
+                        </div>
+                        <div class="o_sparkle_service_grid">
+                            <button t-foreach="filteredServices" t-as="service" t-key="service.id"
+                                    type="button"
+                                    t-att-class="state.selectedService &amp;&amp; state.selectedService.id === service.id ? 'o_sparkle_service_tile is-selected' : 'o_sparkle_service_tile'"
+                                    t-on-click="() => this.selectService(service)">
+                                <span t-if="service.image_url" class="o_sparkle_service_image">
+                                    <img t-att-src="service.image_url" t-att-alt="service.name"/>
+                                </span>
+                                <i t-else="" t-att-class="service.icon_class"/>
+                                <strong t-esc="service.name"/>
+                                <span t-esc="service.description"/>
+                                <em/>
+                            </button>
+                        </div>
                     </section>
 
                     <section t-if="state.step === 2" class="o_sparkle_booking_card o_sparkle_schedule">
@@ -62,11 +77,11 @@
                             <p t-if="state.loadingSlots" class="o_sparkle_slot_note">Loading times...</p>
                             <p t-elif="!state.selectedDate" class="o_sparkle_slot_note">Select a date first.</p>
                             <p t-elif="!state.times.length" class="o_sparkle_slot_note">No times available.</p>
-                            <button t-foreach="state.times" t-as="time" t-key="time"
+                            <button t-foreach="state.times" t-as="time" t-key="time.key"
                                     type="button"
-                                    t-att-class="state.selectedTime === time ? 'is-selected' : ''"
+                                    t-att-class="state.selectedTime &amp;&amp; state.selectedTime.key === time.key ? 'is-selected' : ''"
                                     t-on-click="() => this.selectTime(time)"
-                                    t-esc="time"/>
+                                    t-esc="time.label"/>
                         </div>
                     </section>
 
@@ -110,7 +125,7 @@
                         </div>
                         <h2>Booking Confirmed</h2>
                         <p>Your cleaning service has been successfully booked.<br/>We look forward to serving you at your scheduled appointment.</p>
-                        <button type="button" class="o_sparkle_download"><i class="fa fa-download"/> Download Booking Details</button>
+                        <button type="button" class="o_sparkle_download" t-on-click="downloadBookingDetails" t-att-disabled="!state.downloadUrl"><i class="fa fa-download"/> Download Booking Details</button>
                     </section>
                 </main>
 
@@ -131,12 +146,15 @@
 
     <t t-name="sparkle_booking_flow.Summary">
         <aside class="o_sparkle_summary">
-            <i t-att-class="props.selectedService &amp;&amp; props.selectedService.icon_class || 'fa fa-object-group'"/>
+            <span t-if="props.selectedService &amp;&amp; props.selectedService.image_url" class="o_sparkle_summary_image">
+                <img t-att-src="props.selectedService.image_url" t-att-alt="props.selectedService.name"/>
+            </span>
+            <i t-else="" t-att-class="props.selectedService &amp;&amp; props.selectedService.icon_class || 'fa fa-object-group'"/>
             <h3 t-esc="props.selectedService &amp;&amp; props.selectedService.name || 'Carpet &amp; Upholstery Cleaning'"/>
             <p t-esc="props.selectedService &amp;&amp; props.selectedService.description || 'Professional steam and dry cleaning.'"/>
             <h4>Booking Details</h4>
             <p>Date : <strong t-esc="props.selectedDateLabel || ''"/></p>
-            <p>Time : <strong t-esc="props.selectedTime || ''"/></p>
+            <p>Time : <strong t-esc="props.selectedTime &amp;&amp; props.selectedTime.label || ''"/></p>
         </aside>
     </t>
 </templates>

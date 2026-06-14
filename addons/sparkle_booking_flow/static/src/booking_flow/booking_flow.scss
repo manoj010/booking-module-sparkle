@@ -121,6 +121,35 @@ body.o_sparkle_booking_locked {
 }
 
 .o_sparkle_services {
+    display: block;
+}
+
+.o_sparkle_service_filters {
+    align-items: center;
+    border-bottom: 1px solid #e8e8e8;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 22px;
+
+    button {
+        background: #fff;
+        border: 1px solid #d8d8d8;
+        border-radius: 999px;
+        color: #333;
+        min-height: 38px;
+        padding: 0 18px;
+
+        &.is-active {
+            background: #008bd2;
+            border-color: #008bd2;
+            color: #fff;
+            font-weight: 800;
+        }
+    }
+}
+
+.o_sparkle_service_grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -176,6 +205,32 @@ body.o_sparkle_booking_locked {
             box-shadow: inset 0 0 0 4px #fff;
         }
     }
+}
+
+.o_sparkle_service_image,
+.o_sparkle_summary_image {
+    border-radius: 50%;
+    display: block;
+    overflow: hidden;
+
+    img {
+        display: block;
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
+    }
+}
+
+.o_sparkle_service_image {
+    height: 70px;
+    margin-bottom: 18px;
+    width: 70px;
+}
+
+.o_sparkle_summary_image {
+    height: 86px;
+    margin-bottom: 24px;
+    width: 86px;
 }
 
 .o_sparkle_schedule,
@@ -605,7 +660,7 @@ body.o_sparkle_booking_locked {
         }
     }
 
-    .o_sparkle_services {
+    .o_sparkle_service_grid {
         grid-template-columns: 1fr;
     }
 
