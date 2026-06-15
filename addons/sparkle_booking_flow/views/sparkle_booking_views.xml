@@ -32,7 +32,7 @@
                 <templates>
                     <t t-name="card">
                         <div class="o_kanban_image">
-                            <img t-att-src="kanban_image('product.template', 'image_128', record.id.raw_value)" alt="Service"/>
+                            <img t-att-src="'/web/image/product.template/' + record.id.raw_value + '/image_128'" alt="Service"/>
                         </div>
                         <div class="oe_kanban_details">
                             <strong class="o_kanban_record_title">
@@ -99,6 +99,24 @@
         </field>
     </record>
 
+    <record id="sparkle_booking_product_template_form_inherit" model="ir.ui.view">
+        <field name="name">sparkle.booking.product.template.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='group_standard_price']" position="after">
+                <group name="sparkle_booking_settings" string="Sparkle Booking" invisible="type != 'service'">
+                    <field name="sparkle_bookable_service"/>
+                    <field name="sparkle_duration_minutes"/>
+                    <field name="sparkle_icon_class"/>
+                    <field name="sparkle_appointment_type_id"/>
+                    <button name="action_sync_sparkle_appointment_type" type="object" string="Generate/Sync Appointment" class="btn-primary" invisible="not sparkle_bookable_service"/>
+                    <button name="action_open_sparkle_appointment_type" type="object" string="Open Appointment Type" invisible="not sparkle_appointment_type_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
     <record id="sparkle_booking_service_action" model="ir.actions.act_window">
         <field name="name">Service Products</field>
         <field name="res_model">product.template</field>
@@ -113,6 +131,27 @@
                 Add images, categories, pricing, and appointment settings here. These products appear dynamically in the website booking flow.
             </p>
         </field>
+    </record>
+
+    <record id="sparkle_booking_service_action_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="sparkle_booking_service_view_kanban"/>
+        <field name="act_window_id" ref="sparkle_booking_service_action"/>
+    </record>
+
+    <record id="sparkle_booking_service_action_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="sparkle_booking_service_view_tree"/>
+        <field name="act_window_id" ref="sparkle_booking_service_action"/>
+    </record>
+
+    <record id="sparkle_booking_service_action_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="sparkle_booking_service_view_form"/>
+        <field name="act_window_id" ref="sparkle_booking_service_action"/>
     </record>
 
     <record id="sparkle_booking_view_tree" model="ir.ui.view">

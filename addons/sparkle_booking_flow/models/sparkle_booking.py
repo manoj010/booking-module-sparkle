@@ -59,13 +59,11 @@ class ProductTemplate(models.Model):
             self._sync_sparkle_appointment_types()
         return result
 
-    @api.constrains("sparkle_bookable_service", "sparkle_appointment_type_id", "sparkle_duration_minutes")
+    @api.constrains("sparkle_bookable_service", "sparkle_duration_minutes")
     def _check_sparkle_bookable_service_setup(self):
         for product in self:
             if not product.sparkle_bookable_service:
                 continue
-            if not product.sparkle_appointment_type_id:
-                raise ValidationError("Bookable Sparkle services must have an appointment type.")
             if product.sparkle_duration_minutes <= 0:
                 raise ValidationError("Bookable Sparkle services must have a positive duration.")
 
