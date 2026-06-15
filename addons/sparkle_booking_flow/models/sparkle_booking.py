@@ -504,6 +504,7 @@ class SparkleBooking(models.Model):
         return True
 
     def action_create_or_update_crm_lead(self):
+        action = False
         for booking in self:
             values = booking._prepare_crm_lead_values()
             if booking.crm_lead_id:
@@ -513,7 +514,8 @@ class SparkleBooking(models.Model):
                 lead = self.env["crm.lead"].sudo().create(values)
                 booking.crm_lead_id = lead.id
                 booking.message_post(body="CRM opportunity created: %s" % html_escape(lead.display_name))
-        return True
+            action = booking.action_open_crm_lead()
+        return action or True
 
     def action_open_appointment_event(self):
         self.ensure_one()

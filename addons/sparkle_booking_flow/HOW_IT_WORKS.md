@@ -8,7 +8,7 @@ The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointm
 
 - A website overlay opened by any button or link with the class `js_open_sparkle_booking`.
 - Website service choices powered by Odoo service products.
-- Optional service images and product category filtering in the Sparkle UI.
+- Optional service images in the Sparkle UI.
 - Odoo Appointment Types linked to bookable service products.
 - Stable Appointment slot payloads so the frontend submits an exact slot key, not only a time label.
 - Confirmed `sparkle.booking` records for website submissions.
@@ -30,7 +30,7 @@ The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointm
 9. Odoo creates the linked Appointment `calendar.event`.
 10. Odoo creates or updates the linked CRM opportunity.
 11. The success screen confirms the booking and offers a booking PDF download.
-12. Admin staff follow up with the customer by phone or email from the booking/CRM lead.
+12. Admin staff follow up with the customer by phone or email from the booking/CRM record.
 
 ## Service Products
 
@@ -56,6 +56,7 @@ Sparkle-specific product fields:
 - `Sparkle Appointment Type`: Odoo Appointment Type used for availability and booked events.
 
 The service product form also includes image upload, category, and buttons to generate/sync or open the linked Appointment Type.
+The backend `Service Products` kanban is intentionally shown as one flat grid instead of category-grouped columns.
 
 ## Booking Creation
 
@@ -71,7 +72,7 @@ The model owns the reusable creation logic:
 - slot re-validation
 - booking creation
 - appointment event creation
-- CRM lead creation/update
+- CRM opportunity creation/update
 - PDF download URL creation
 
 This keeps the website route small and makes the booking behavior reusable from backend actions, tests, imports, or future APIs.
@@ -119,8 +120,8 @@ Backend actions:
 - `Confirm`: marks the booking confirmed and the appointment booked.
 - `Cancel`: cancels the booking, archives the appointment event, and marks the CRM opportunity lost.
 - `Mark Done`: marks the booking done, sets the appointment status to checked-in/attended, and sets CRM probability to 100.
-- `Create/Update CRM Lead`: creates or refreshes the linked opportunity.
-- Smart buttons open the customer, appointment event, and CRM lead.
+- `Create/Update CRM`: creates or refreshes the linked opportunity and opens it.
+- Smart buttons open the customer, appointment event, and CRM record.
 
 ## Appointment Events
 
@@ -181,6 +182,26 @@ Required external addons:
 - `gantt_view`
 
 The Odoo config includes `/mnt/external-addons` in `addons_path`.
+
+## Moving To Another Project
+
+You can copy only this addon folder:
+
+```text
+addons/sparkle_booking_flow
+```
+
+Into another Odoo 18 project, as long as that target project also provides the required Appointment addons in its `addons_path`.
+
+Checklist for the target project:
+
+- Odoo version is `18.0`
+- `sparkle_booking_flow` is inside a scanned addons directory
+- the target `addons_path` also includes the Appointment addon source
+- these modules are available/installable: `appointment`, `appointment_crm`, `website_appointment_crm`, `gantt_view`
+- base dependencies are installed: `crm`, `calendar`, `product`, `website`, `web`
+
+There are no hardcoded local Windows paths, localhost ports, or repo-specific filesystem references inside the addon code itself. The only project-specific part is making sure the Appointment addons exist in the target Odoo environment.
 
 ## Updating After Code Changes
 
