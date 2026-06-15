@@ -125,7 +125,6 @@
                         </div>
                         <h2>Booking Confirmed</h2>
                         <p>Your cleaning service has been successfully booked.<br/>We look forward to serving you at your scheduled appointment.</p>
-                        <button type="button" class="o_sparkle_download" t-on-click="downloadBookingDetails" t-att-disabled="!state.downloadUrl"><i class="fa fa-download"/> Download Booking Details</button>
                     </section>
                 </main>
 

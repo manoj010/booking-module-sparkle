@@ -2,7 +2,7 @@
 
 This Odoo 18 addon provides a custom full-screen Sparkle website booking flow while using Odoo standard apps for the business objects behind it.
 
-The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointment, Calendar, CRM, Portal, and Mail.
+The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointment, Calendar, and CRM.
 
 ## What It Adds
 
@@ -14,9 +14,6 @@ The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointm
 - Confirmed `sparkle.booking` records for website submissions.
 - Linked Odoo Appointment `calendar.event` records.
 - Linked Odoo CRM opportunities with source `Website Booking`.
-- Confirmation emails using an Odoo mail template.
-- Customer portal pages under `/my/sparkle-bookings`.
-- Calendar invite download as an `.ics` file.
 - Backend workflow buttons for confirming, cancelling, completing, and opening linked records.
 
 ## User Flow
@@ -31,8 +28,8 @@ The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointm
 8. Odoo creates the `sparkle.booking` record.
 9. Odoo creates the linked Appointment `calendar.event`.
 10. Odoo creates or updates the linked CRM opportunity.
-11. Odoo sends the confirmation email.
-12. The success screen exposes a calendar invite download.
+11. The success screen confirms the booking.
+12. Admin staff follow up with the customer by phone or email from the booking/CRM lead.
 
 ## Service Products
 
@@ -74,7 +71,6 @@ The model owns the reusable creation logic:
 - booking creation
 - appointment event creation
 - CRM lead creation/update
-- confirmation email sending
 
 This keeps the website route small and makes the booking behavior reusable from backend actions, tests, imports, or future APIs.
 
@@ -147,23 +143,17 @@ Every new website booking creates a CRM opportunity:
 
 Bookings and CRM opportunities can be opened from each other through backend links/actions.
 
-## Portal And Downloads
+## Customer Follow-Up
 
-Customers can view their bookings under:
+This version does not create customer portal accounts, customer passwords, confirmation emails, or public booking download links.
 
-```text
-/my/sparkle-bookings
-```
+The customer only enters details in the Sparkle booking form. Admin staff then use:
 
-Each booking detail page includes the booking status, appointment time, contact details, and a calendar invite download.
+- `Sparkle Booking -> Bookings`
+- `Sparkle Booking -> CRM Leads`
+- the linked customer contact
 
-The public `.ics` download route uses the booking access token:
-
-```text
-/sparkle-booking/<booking_id>/calendar.ics?access_token=<token>
-```
-
-The same download link is returned to the frontend success screen and included in the confirmation email.
+to call or email the customer manually.
 
 ## Docker External Addons
 

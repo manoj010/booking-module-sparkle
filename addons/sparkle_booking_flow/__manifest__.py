@@ -9,7 +9,6 @@
         "appointment",
         "calendar",
         "crm",
-        "portal",
         "product",
         "web",
         "website",
@@ -17,7 +16,6 @@
     "data": [
         "security/ir.model.access.csv",
         "data/crm_source.xml",
-        "data/mail_template.xml",
         "data/service_products.xml",
         "views/sparkle_booking_views.xml",
         "views/website_templates.xml",

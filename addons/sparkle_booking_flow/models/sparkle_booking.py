@@ -1,6 +1,4 @@
 from datetime import timedelta
-from uuid import uuid4
-
 import pytz
 
 from odoo import Command, api, fields, models
@@ -192,7 +190,6 @@ class SparkleBooking(models.Model):
     calendar_event_id = fields.Many2one("calendar.event", string="Calendar Event", readonly=True)
     appointment_type_id = fields.Many2one("appointment.type", string="Appointment Type", readonly=True)
     crm_lead_id = fields.Many2one("crm.lead", string="CRM Lead", readonly=True)
-    access_token = fields.Char(default=lambda self: uuid4().hex, readonly=True, copy=False)
     customer_name = fields.Char(required=True)
     email = fields.Char(required=True)
     phone = fields.Char()
@@ -305,7 +302,6 @@ class SparkleBooking(models.Model):
         event = booking._create_appointment_event(selected_slot)
         booking.calendar_event_id = event.id
         booking.action_create_or_update_crm_lead()
-        booking._send_confirmation_email()
         return booking
 
     @api.model
@@ -440,15 +436,6 @@ class SparkleBooking(models.Model):
         )
         return self.env["calendar.event"].sudo().create(event_values)
 
-    def _send_confirmation_email(self):
-        template = self.env.ref("sparkle_booking_flow.mail_template_sparkle_booking_confirmation", False)
-        if template:
-            for booking in self:
-                template.sudo().send_mail(booking.id, force_send=True)
-
-    def get_download_url(self):
-        self.ensure_one()
-        return "/sparkle-booking/%s/calendar.ics?access_token=%s" % (self.id, self.access_token)
 
     def action_confirm_booking(self):
         for booking in self:

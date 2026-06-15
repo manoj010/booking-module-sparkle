@@ -46,24 +46,8 @@ class SparkleBookingController(http.Controller):
             "booking_id": booking.id,
             "calendar_event_id": booking.calendar_event_id.id,
             "crm_lead_id": booking.crm_lead_id.id,
-            "download_url": booking.get_download_url(),
             "message": "Your cleaning service has been successfully booked.",
         }
-
-    @http.route("/sparkle-booking/<int:booking_id>/calendar.ics", type="http", auth="public", website=True)
-    def download_calendar(self, booking_id, access_token=None, **kwargs):
-        booking = request.env["sparkle.booking"].sudo().browse(booking_id).exists()
-        if not booking or booking.access_token != access_token:
-            return request.not_found()
-
-        content = self._booking_ics(booking)
-        return request.make_response(
-            content,
-            [
-                ("Content-Type", "text/calendar; charset=utf-8"),
-                ("Content-Disposition", 'attachment; filename="sparkle-booking-%s.ics"' % booking.id),
-            ],
-        )
 
     def _safe_int(self, value):
         try:
@@ -88,37 +72,3 @@ class SparkleBookingController(http.Controller):
             }
             for slot in slots
         ]
-
-    def _booking_ics(self, booking):
-        def fmt(value):
-            return fields.Datetime.to_datetime(value).strftime("%Y%m%dT%H%M%SZ")
-
-        def esc(value):
-            return (value or "").replace("\\", "\\\\").replace(",", "\\,").replace(";", "\\;").replace("\n", "\\n")
-
-        summary = "Sparkle Booking: %s" % booking.product_id.display_name
-        description = "Customer: %s\\nEmail: %s\\nPhone: %s" % (
-            booking.customer_name,
-            booking.email,
-            booking.phone or "",
-        )
-        if booking.message:
-            description += "\\nMessage: %s" % booking.message
-        return "\r\n".join(
-            [
-                "BEGIN:VCALENDAR",
-                "VERSION:2.0",
-                "PRODID:-//Sparkle Booking//EN",
-                "BEGIN:VEVENT",
-                "UID:sparkle-booking-%s@%s" % (booking.id, request.httprequest.host or "localhost"),
-                "DTSTAMP:%s" % fields.Datetime.to_datetime(fields.Datetime.now()).strftime("%Y%m%dT%H%M%SZ"),
-                "DTSTART:%s" % fmt(booking.booking_start),
-                "DTEND:%s" % fmt(booking.booking_stop),
-                "SUMMARY:%s" % esc(summary),
-                "DESCRIPTION:%s" % esc(description),
-                "LOCATION:%s" % esc(booking.location),
-                "END:VEVENT",
-                "END:VCALENDAR",
-                "",
-            ]
-        )

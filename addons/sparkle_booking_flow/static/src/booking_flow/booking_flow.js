@@ -94,7 +94,6 @@ export class SparkleBookingFlow extends Component {
             },
             paymentMethod: "pay_later",
             bookingId: null,
-            downloadUrl: "",
             loading: false,
             loadingSlots: false,
             error: null,
@@ -209,7 +208,6 @@ export class SparkleBookingFlow extends Component {
         this.state.customer.message = "";
         this.state.paymentMethod = "pay_later";
         this.state.bookingId = null;
-        this.state.downloadUrl = "";
         this.state.error = null;
     }
 
@@ -365,7 +363,6 @@ export class SparkleBookingFlow extends Component {
                 return;
             }
             this.state.bookingId = result.booking_id;
-            this.state.downloadUrl = result.download_url || "";
             this.state.step = 5;
         } catch {
             this.state.error = "We could not create this booking. Please try again.";
@@ -374,11 +371,6 @@ export class SparkleBookingFlow extends Component {
         }
     }
 
-    downloadBookingDetails() {
-        if (this.state.downloadUrl) {
-            window.location.href = this.state.downloadUrl;
-        }
-    }
 }
 
 function wireBookingButtons() {
