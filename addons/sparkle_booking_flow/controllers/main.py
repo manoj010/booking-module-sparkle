@@ -46,8 +46,25 @@ class SparkleBookingController(http.Controller):
             "booking_id": booking.id,
             "calendar_event_id": booking.calendar_event_id.id,
             "crm_lead_id": booking.crm_lead_id.id,
+            "download_url": booking.get_pdf_download_url(),
             "message": "Your cleaning service has been successfully booked.",
         }
+
+    @http.route("/sparkle-booking/<int:booking_id>/pdf", type="http", auth="public", website=True)
+    def download_booking_pdf(self, booking_id, access_token=None, **kwargs):
+        booking = request.env["sparkle.booking"].sudo().browse(booking_id).exists()
+        if not booking or booking.access_token != access_token:
+            return request.not_found()
+
+        report = request.env.ref("sparkle_booking_flow.action_report_sparkle_booking").sudo()
+        pdf_content, _ = report._render_qweb_pdf(report.report_name, [booking.id])
+        return request.make_response(
+            pdf_content,
+            [
+                ("Content-Type", "application/pdf"),
+                ("Content-Disposition", 'attachment; filename="sparkle-booking-%s.pdf"' % booking.id),
+            ],
+        )
 
     def _safe_int(self, value):
         try:

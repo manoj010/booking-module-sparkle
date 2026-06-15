@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_sparkle_booking" model="ir.actions.report">
+        <field name="name">Sparkle Booking</field>
+        <field name="model">sparkle.booking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sparkle_booking_flow.report_sparkle_booking_document</field>
+        <field name="report_file">sparkle_booking_flow.report_sparkle_booking_document</field>
+        <field name="print_report_name">'Sparkle Booking - %s' % (object.customer_name)</field>
+        <field name="binding_model_id" ref="model_sparkle_booking"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_sparkle_booking_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Sparkle Booking</h2>
+                        <p>
+                            <strong>Booking #</strong>
+                            <span t-out="o.id"/>
+                        </p>
+
+                        <h3>Service</h3>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Service</strong></td>
+                                <td><span t-field="o.product_id"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Price</strong></td>
+                                <td>
+                                    <span t-field="o.price" t-options="{'widget': 'monetary', 'display_currency': o.env.company.currency_id}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status</strong></td>
+                                <td><span t-field="o.state"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Payment</strong></td>
+                                <td><span t-field="o.payment_status"/></td>
+                            </tr>
+                        </table>
+
+                        <h3>Appointment</h3>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Start</strong></td>
+                                <td><span t-field="o.booking_start"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>End</strong></td>
+                                <td><span t-field="o.booking_stop"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Location</strong></td>
+                                <td><span t-out="o.location or ''"/></td>
+                            </tr>
+                        </table>
+
+                        <h3>Customer</h3>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Name</strong></td>
+                                <td><span t-out="o.customer_name"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email</strong></td>
+                                <td><span t-out="o.email"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phone</strong></td>
+                                <td><span t-out="o.phone or ''"/></td>
+                            </tr>
+                        </table>
+
+                        <div t-if="o.message">
+                            <h3>Message</h3>
+                            <p t-out="o.message"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

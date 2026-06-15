@@ -1,4 +1,5 @@
 from datetime import timedelta
+from uuid import uuid4
 import pytz
 
 from odoo import Command, api, fields, models
@@ -66,7 +67,15 @@ class ProductTemplate(models.Model):
                 raise ValidationError("Bookable Sparkle services must have a positive duration.")
 
     def init(self):
+        self._configure_sparkle_company_currency()
         self._sync_sparkle_appointment_types()
+
+    def _configure_sparkle_company_currency(self):
+        aud = self.env.ref("base.AUD", raise_if_not_found=False)
+        company = self.env.ref("base.main_company", raise_if_not_found=False)
+        if aud and company:
+            aud.sudo().write({"active": True, "symbol": "A$"})
+            company.sudo().write({"currency_id": aud.id})
 
     def action_open_sparkle_appointment_type(self):
         self.ensure_one()
@@ -190,6 +199,7 @@ class SparkleBooking(models.Model):
     calendar_event_id = fields.Many2one("calendar.event", string="Calendar Event", readonly=True)
     appointment_type_id = fields.Many2one("appointment.type", string="Appointment Type", readonly=True)
     crm_lead_id = fields.Many2one("crm.lead", string="CRM Lead", readonly=True)
+    access_token = fields.Char(default=lambda self: uuid4().hex, readonly=True, copy=False)
     customer_name = fields.Char(required=True)
     email = fields.Char(required=True)
     phone = fields.Char()
@@ -435,6 +445,10 @@ class SparkleBooking(models.Model):
             }
         )
         return self.env["calendar.event"].sudo().create(event_values)
+
+    def get_pdf_download_url(self):
+        self.ensure_one()
+        return "/sparkle-booking/%s/pdf?access_token=%s" % (self.id, self.access_token)
 
 
     def action_confirm_booking(self):

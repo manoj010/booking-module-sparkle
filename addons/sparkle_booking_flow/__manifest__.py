@@ -17,6 +17,7 @@
         "security/ir.model.access.csv",
         "data/crm_source.xml",
         "data/service_products.xml",
+        "report/booking_report.xml",
         "views/sparkle_booking_views.xml",
         "views/website_templates.xml",
     ],

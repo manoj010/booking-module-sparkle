@@ -14,6 +14,7 @@ The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointm
 - Confirmed `sparkle.booking` records for website submissions.
 - Linked Odoo Appointment `calendar.event` records.
 - Linked Odoo CRM opportunities with source `Website Booking`.
+- Tokenized booking PDF download from the success screen.
 - Backend workflow buttons for confirming, cancelling, completing, and opening linked records.
 
 ## User Flow
@@ -28,7 +29,7 @@ The frontend keeps the Sparkle styling. The backend uses Odoo Products, Appointm
 8. Odoo creates the `sparkle.booking` record.
 9. Odoo creates the linked Appointment `calendar.event`.
 10. Odoo creates or updates the linked CRM opportunity.
-11. The success screen confirms the booking.
+11. The success screen confirms the booking and offers a booking PDF download.
 12. Admin staff follow up with the customer by phone or email from the booking/CRM lead.
 
 ## Service Products
@@ -71,6 +72,7 @@ The model owns the reusable creation logic:
 - booking creation
 - appointment event creation
 - CRM lead creation/update
+- PDF download URL creation
 
 This keeps the website route small and makes the booking behavior reusable from backend actions, tests, imports, or future APIs.
 
@@ -145,15 +147,23 @@ Bookings and CRM opportunities can be opened from each other through backend lin
 
 ## Customer Follow-Up
 
-This version does not create customer portal accounts, customer passwords, confirmation emails, or public booking download links.
+This version does not create customer portal accounts, customer passwords, or confirmation emails.
 
-The customer only enters details in the Sparkle booking form. Admin staff then use:
+The customer only enters details in the Sparkle booking form. The success screen includes a tokenized PDF download for that booking. Admin staff then use:
 
 - `Sparkle Booking -> Bookings`
 - `Sparkle Booking -> CRM Leads`
 - the linked customer contact
 
 to call or email the customer manually.
+
+The public PDF route is:
+
+```text
+/sparkle-booking/<booking_id>/pdf?access_token=<token>
+```
+
+The token is generated per booking and returned only after successful booking creation.
 
 ## Docker External Addons
 
