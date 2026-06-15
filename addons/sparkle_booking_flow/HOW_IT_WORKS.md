@@ -152,7 +152,7 @@ This version does not create customer portal accounts, customer passwords, or co
 The customer only enters details in the Sparkle booking form. The success screen includes a tokenized PDF download for that booking. Admin staff then use:
 
 - `Sparkle Booking -> Bookings`
-- `Sparkle Booking -> CRM Leads`
+- `Sparkle Booking -> CRM`
 - the linked customer contact
 
 to call or email the customer manually.

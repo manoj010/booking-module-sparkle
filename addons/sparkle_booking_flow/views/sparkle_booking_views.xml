@@ -236,17 +236,9 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <record id="sparkle_booking_crm_lead_action" model="ir.actions.act_window">
-        <field name="name">CRM Leads</field>
-        <field name="res_model">crm.lead</field>
-        <field name="view_mode">kanban,list,form,calendar,pivot,graph,activity</field>
-        <field name="domain">[('source_id.name', '=', 'Website Booking')]</field>
-        <field name="context" eval="{'default_source_id': ref('sparkle_booking_flow.sparkle_booking_source_website')}"/>
-    </record>
-
     <menuitem id="sparkle_booking_menu_root" name="Sparkle Booking" sequence="30"/>
     <menuitem id="sparkle_booking_menu_services" name="Service Products" parent="sparkle_booking_menu_root" action="sparkle_booking_service_action" sequence="10"/>
     <menuitem id="sparkle_booking_menu_appointments" name="Appointments" parent="sparkle_booking_menu_root" action="appointment.appointment_type_action" sequence="30"/>
     <menuitem id="sparkle_booking_menu_bookings" name="Bookings" parent="sparkle_booking_menu_root" action="sparkle_booking_action" sequence="40"/>
-    <menuitem id="sparkle_booking_menu_crm_leads" name="CRM Leads" parent="sparkle_booking_menu_root" action="sparkle_booking_crm_lead_action" sequence="50"/>
+    <menuitem id="sparkle_booking_menu_crm_leads" name="CRM" parent="sparkle_booking_menu_root" action="crm.crm_lead_action_pipeline" sequence="50"/>
 </odoo>
